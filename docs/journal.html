@@ -554,7 +554,59 @@ bike_orderlines_wrangled_tbl %&gt;%
 <div id="challenge-2-data-acquisition" class="section level1">
 <h1><span class="header-section-number">2</span> Challenge 2 : Data Acquisition</h1>
 <p>Last compiled: 2020-12-06</p>
-<p>I’m writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom</p>
+<div id="api-challenge" class="section level2">
+<h2><span class="header-section-number">2.1</span> API Challenge</h2>
+<pre class="r"><code>library(glue)
+library(httr)
+library(jsonlite)
+resp &lt;- GET(&quot;http://api.open-notify.org/iss-pass.json&quot;, query = list(lat =53.5511, lon = 9.9937))
+resp</code></pre>
+<pre><code>## Response [http://api.open-notify.org/iss-pass.json?lat=53.5511&amp;lon=9.9937]
+##   Date: 2020-12-06 21:16
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 522 B
+## {
+##   &quot;message&quot;: &quot;success&quot;, 
+##   &quot;request&quot;: {
+##     &quot;altitude&quot;: 100, 
+##     &quot;datetime&quot;: 1607289383, 
+##     &quot;latitude&quot;: 53.5511, 
+##     &quot;longitude&quot;: 9.9937, 
+##     &quot;passes&quot;: 5
+##   }, 
+##   &quot;response&quot;: [
+## ...</code></pre>
+<pre class="r"><code>data = fromJSON(rawToChar(resp$content))
+data</code></pre>
+<pre><code>## $message
+## [1] &quot;success&quot;
+## 
+## $request
+## $request$altitude
+## [1] 100
+## 
+## $request$datetime
+## [1] 1607289383
+## 
+## $request$latitude
+## [1] 53.5511
+## 
+## $request$longitude
+## [1] 9.9937
+## 
+## $request$passes
+## [1] 5
+## 
+## 
+## $response
+##   duration   risetime
+## 1      391 1607335587
+## 2      608 1607341228
+## 3      649 1607346990
+## 4      650 1607352787
+## 5      615 1607358591</code></pre>
+</div>
 </div>
 <div id="challenge-3-data-wrangling" class="section level1">
 <h1><span class="header-section-number">3</span> Challenge 3 : Data Wrangling</h1>
@@ -563,7 +615,7 @@ bike_orderlines_wrangled_tbl %&gt;%
 <p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. ## 2.Recent patent acitivity So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-1-1.png" width="672" /> #Challenge 4 :</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-2-1.png" width="672" /> #Challenge 4 :</p>
 </div>
 <div id="map-the-time-course-of-the-cumulative-covid-19-cases" class="section level2">
 <h2><span class="header-section-number">3.2</span> 1. Map the time course of the cumulative Covid-19 cases</h2>

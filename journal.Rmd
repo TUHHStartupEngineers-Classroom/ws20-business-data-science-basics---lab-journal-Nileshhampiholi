@@ -154,7 +154,18 @@ bike_orderlines_wrangled_tbl %>%
 
 Last compiled: `r Sys.Date()`
 
-I'm writing this tutorial going from the top down. And, this is how it will be printed. So, notice the second post is second in the list. If you want your most recent post to be at the top, then make a new post starting at the top. If you want the oldest first, do, then keep adding to the bottom
+## API Challenge
+
+```{r}
+library(glue)
+library(httr)
+library(jsonlite)
+resp <- GET("http://api.open-notify.org/iss-pass.json", query = list(lat =53.5511, lon = 9.9937))
+resp
+data = fromJSON(rawToChar(resp$content))
+data
+
+```
 
 # Challenge 3 : Data Wrangling 
 
