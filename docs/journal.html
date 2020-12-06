@@ -677,13 +677,75 @@ head(model_price_tbl,10)</code></pre>
 <h1><span class="header-section-number">3</span> Challenge 3 : Data Wrangling</h1>
 <div id="patent-dominance" class="section level2">
 <h2><span class="header-section-number">3.1</span> 1. Patent Dominance</h2>
-<p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. ## 2.Recent patent acitivity So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
+<pre class="r"><code>library(vroom)
+library(data.table)
+library(tidyverse)
+col_types &lt;- list(
+  id = col_character(),
+  type = col_character(),
+  name_first = col_character(),
+  name_last = col_character(),
+  organization = col_character()
+)
+
+assignee_tbl &lt;- vroom(
+  file       = &quot;D:/pADHAI/SEM_3/DataScience/DS_101/02_data_wrangling/assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+col_types &lt;- list(
+  patent_id = col_character(),
+  assignee_id = col_character(),
+  location_id = col_character()
+)
+
+patent_assignee_tbl &lt;- vroom(
+  file       = &quot;D:/pADHAI/SEM_3/DataScience/DS_101/02_data_wrangling/patent_assignee.tsv&quot;, 
+  delim      = &quot;\t&quot;, 
+  col_types  = col_types,
+  na         = c(&quot;&quot;, &quot;NA&quot;, &quot;NULL&quot;)
+)
+
+Join_tbl &lt;- merge(patent_assignee_tbl,assignee_tbl, by.x = &quot;assignee_id&quot;, by.y = &quot;id&quot;) 
+
+num_tbl&lt;- Join_tbl%&gt;%
+  select(patent_id,organization)%&gt;% 
+  count(organization)%&gt;%
+  group_by(organization) 
+
+final_tbl &lt;- num_tbl %&gt;%
+  select (organization,n)%&gt;%
+  arrange(desc(n))
+
+#List of top ten companies with most assigned/granted patents.
+
+head(final_tbl,10)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+## # Groups:   organization [10]
+##    organization                                     n
+##    &lt;chr&gt;                                        &lt;int&gt;
+##  1 International Business Machines Corporation 139091
+##  2 Samsung Electronics Co., Ltd.                93561
+##  3 Canon Kabushiki Kaisha                       75909
+##  4 &lt;NA&gt;                                         73070
+##  5 Sony Corporation                             54342
+##  6 Kabushiki Kaisha Toshiba                     49442
+##  7 General Electric Company                     47121
+##  8 Hitachi, Ltd.                                45374
+##  9 Intel Corporation                            42156
+## 10 Fujitsu Limited                              37196</code></pre>
+</div>
+<div id="recent-patent-acitivity" class="section level2">
+<h2><span class="header-section-number">3.2</span> 2.Recent patent acitivity</h2>
+<p>So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-3-1.png" width="672" /> #Challenge 4 :</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-4-1.png" width="672" /> #Challenge 4 :</p>
 </div>
 <div id="map-the-time-course-of-the-cumulative-covid-19-cases" class="section level2">
-<h2><span class="header-section-number">3.2</span> 1. Map the time course of the cumulative Covid-19 cases</h2>
+<h2><span class="header-section-number">3.3</span> 1. Map the time course of the cumulative Covid-19 cases</h2>
 <p>When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You’ll learn that all of these things and more can be customized in each R code block. ## 2. Visualize the distribution of the mortality rate (deaths / population)</p>
 </div>
 </div>
