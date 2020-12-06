@@ -289,7 +289,131 @@ hist(samples)
 #Challenge 4 : 
 
 ## 1. Map the time course of the cumulative Covid-19 cases
-When you knit this R Markdown document, you will see that the histogram is printed to the page, along with the R code. This document can be set up to hide the R code in the webpage, just delete the comment (hashtag) from the cold folding option in the yaml header up top. For purposes of letting yourself see the code, and me see the code, best to keep it the way that it is. You'll learn that all of these things and more can be customized in each R code block.
-## 2.  Visualize the distribution of the mortality rate (deaths / population)
+
+Challenge 1
+
+```{r}
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(ggrepel)
+library(mapproj)
 
 
+url <- "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv"
+covid_data_tbl <- fread(url)
+
+class(covid_data_tbl)
+colnames(covid_data_tbl)
+str(covid_data_tbl)
+
+#check the unique country present.
+unique(covid_data_tbl$countriesAndTerritories)
+
+#getting month name column
+covid_data_tbl$month_name<-months(as.Date(covid_data_tbl$dateRep))
+
+##rolling up data to month year country Level
+covid_mon_yr_country_lvl <- covid_data_tbl %>% 
+  dplyr::group_by(month,month_name,year,countriesAndTerritories,geoId,countryterritoryCode,continentExp) %>% 
+  dplyr::summarise(cases = sum(cases, na.rm = T)) %>% 
+  dplyr::ungroup()
+
+##creating Cummulative Cases column
+covid_mon_yr_country_lvl <- covid_mon_yr_country_lvl %>% 
+  dplyr::arrange(countriesAndTerritories,year,month) %>% 
+  dplyr::group_by(countriesAndTerritories) %>% 
+  dplyr::mutate(cumulative_cases = cumsum(cases)) %>% 
+  dplyr::ungroup()
+
+##I am filtering only for those shown in the graph and for the year = 2020
+covid_mon_yr_country_lvl_fil<- covid_mon_yr_country_lvl %>% 
+  dplyr::filter(countriesAndTerritories %in% c("Germany","Spain","France","United_Kingdom","United_States_of_America")& year == 2020) %>%
+  dplyr::rename('Continent_Country' = countriesAndTerritories)
+
+#Graph using ggploat
+covid_mon_yr_country_lvl_fil %>% 
+  mutate(label = if_else(month_name == "December",as.character(cumulative_cases),NA_character_)) %>% 
+  ggplot(aes(x=month,y =cumulative_cases))+
+  geom_line(aes(color = Continent_Country))+
+  scale_colour_brewer(palette = "Set1")+
+  scale_x_continuous(breaks=covid_mon_yr_country_lvl_fil$month,labels = covid_mon_yr_country_lvl_fil$month_name)+
+  scale_y_continuous(labels = scales::dollar_format(scale = 1/1e6,
+                                                    prefix = "",
+                                                    suffix = "M"))+
+  labs(title = "COVID-19 confirmed cases worldwide",
+       subtitle =  "As of 12/5/2020,USA has the highest cases.",
+       x = "Year 2020",
+       y= "Cumulative Cases"
+  )+
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle=45,hjust = 1))+
+  geom_label_repel(aes(label=label),
+                   nudge_x = 1,na.rm = TRUE)
+
+```
+
+Challenge 2
+
+```{r}
+cat("\014")
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(ggthemes)
+library(lubridate)
+library(ggrepel)
+library(maps)
+library(readr)
+library(scales)
+## DATA PREPARATION
+covid_data_tbl <- read_csv("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv")
+
+
+covid_mortality_rate <- covid_data_tbl %>%
+  select(countriesAndTerritories, deaths, popData2019) %>% 
+  set_names(c("country", "deaths", "population")) %>%
+  
+  # Selecting columns to focus on and adding a month column
+  mutate(mortality_rate = deaths/population)%>%
+  mutate(across(country, str_replace_all, "_", " ")) %>%
+  mutate(country = case_when(
+    
+    country == "United Kingdom" ~ "UK",
+    country == "United States of America" ~ "USA",
+    country == "Czechia" ~ "Czech Republic",
+    TRUE ~ country
+  )) %>%
+  
+  group_by(country) %>%
+  summarize(deaths=sum(deaths),population=max(population),mortality_rate = sum(mortality_rate)) %>%
+  ungroup() 
+ 
+
+world <- map_data("world")
+
+covid_world_mortality_rate <- left_join(x = world, y = covid_mortality_rate, by=c("region" = "country")) 
+
+ggplot(covid_world_mortality_rate, aes(x=long, y=lat, group = group, fill = (mortality_rate))) + 
+  geom_polygon(colour = "white") +
+  scale_fill_continuous(low = "dodgerblue",
+                        high = "black",
+                        guide="colorbar",
+                        labels=percent,
+                        limits = c(0, .0015)) +
+   
+  
+  
+  theme_bw() +
+  labs(fill = "Mortality Rate" ,
+       title = "Confirmed COVID-19 deaths relative to the size of population", 
+       subtitle = "More than 1.5 Million confirmed COVID-19 deaths worldwide",
+       x="long", 
+       y="lat") 
+
+
+
+  # scale_y_continuous(breaks=c()) +
+  # scale_x_continuous(breaks=c()) +
+  # theme()
+```
