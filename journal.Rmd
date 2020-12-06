@@ -357,10 +357,6 @@ head(Final_tbl,10)
 
 ```
 
-```{r}
-samples <- rnorm(100, mean=0, sd=1)
-hist(samples)
-```
 #Challenge 4 : 
 
 ## 1. Map the time course of the cumulative Covid-19 cases
