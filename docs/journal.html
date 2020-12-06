@@ -607,6 +607,71 @@ data</code></pre>
 ## 4      650 1607352787
 ## 5      615 1607358591</code></pre>
 </div>
+<div id="comparing-compititor-data" class="section level2">
+<h2><span class="header-section-number">2.2</span> Comparing Compititor Data</h2>
+<pre class="r"><code># WEBSCRAPING ----
+
+
+# 1.0 LIBRARIES ----
+
+library(tidyverse) # Main Package - Loads dplyr, purrr, etc.
+library(rvest)     # HTML Hacking &amp; Web Scraping
+library(xopen)     # Quickly opening URLs
+library(jsonlite)  # converts JSON files to R objects
+library(glue)      # concatenate strings
+library(stringi)   # character string/text processing
+
+# 1.1 COLLECT PRODUCT TYPES ----
+url_home          &lt;- &quot;https://www.radon-bikes.de/&quot;
+#xopen(url_home)
+html_home         &lt;- read_html(url_home)
+bike_family_tbl &lt;- html_home %&gt;%
+html_nodes(css = &quot;.megamenu__item &gt; a&quot;) %&gt;%  
+html_attr(&#39;href&#39;) %&gt;%  
+discard(.p = ~stringr::str_detect(.x,&quot;wear&quot;)) %&gt;%  
+enframe(name = &quot;position&quot;, value = &quot;cat_subcat_url&quot;) %&gt;%  
+  
+mutate(family_id = str_glue(&quot;https://www.radon-bikes.de{cat_subcat_url}bikegrid&quot;))
+#bike_family_tbl
+
+ 
+# 2.0 COLLECT BIKE DATA ----
+
+bike_category_url &lt;- bike_family_tbl$family_id[1]
+#xopen(bike_category_url)
+html_bike_category  &lt;- read_html(bike_category_url)
+
+bike_name_tbl        &lt;- html_bike_category %&gt;%
+html_nodes(css = &quot;.m-bikegrid__info .a-heading--small&quot;) %&gt;%
+html_text() %&gt;%
+
+
+enframe(name = &quot;position&quot;, value = &quot;name&quot;)
+#bike_name_tbl 
+
+bike_price_tbl &lt;- html_bike_category %&gt;%
+html_nodes(css = &quot;.m-bikegrid__price.currency_eur .m-bikegrid__price--active&quot;) %&gt;%  
+html_text() %&gt;% 
+enframe(name = &quot;position&quot;, value = &quot;price&quot;)
+#bike_price_tbl
+
+model_price_tbl &lt;- left_join(bike_name_tbl, bike_price_tbl)%&gt;% 
+select(name, price)
+head(model_price_tbl,10)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    name                                                                    price
+##    &lt;chr&gt;                                                                   &lt;chr&gt;
+##  1 &quot;\n                                    JEALOUS 8.0\n                  ~ 2599~
+##  2 &quot;\n                                    JEALOUS 9.0\n                  ~ 2999~
+##  3 &quot;\n                                    JEALOUS 10.0\n                 ~ 3999~
+##  4 &quot;\n                                    JEALOUS 10.0 EA\n              ~ 5299~
+##  5 &quot;\n                                    JEALOUS 10.0\n                 ~ 3699~
+##  6 &quot;\n                                    JEALOUS 10.0 EA\n              ~ 3799€
+##  7 &quot;\n                                    NEW JEALOUS SUPERLITE 1X\n     ~ 999 €
+##  8 &quot;\n                                    JEALOUS AL 8.0\n               ~ 999 €
+##  9 &quot;\n                                    JEALOUS AL 8.0 HD\n            ~ 1299~
+## 10 &quot;\n                                    JEALOUS AL 9.0\n               ~ 1499~</code></pre>
+</div>
 </div>
 <div id="challenge-3-data-wrangling" class="section level1">
 <h1><span class="header-section-number">3</span> Challenge 3 : Data Wrangling</h1>
@@ -615,7 +680,7 @@ data</code></pre>
 <p>So far this is just a blog where you can write in plain text and serve your writing to a webpage. One of the main purposes of this lab journal is to record your progress learning R. The reason I am asking you to use this process is because you can both make a website, and a lab journal, and learn R all in R-studio. This makes everything really convenient and in the same place. ## 2.Recent patent acitivity So, let’s say you are learning how to make a histogram in R. For example, maybe you want to sample 100 numbers from a normal distribution with mean = 0, and standard deviation = 1, and then you want to plot a histogram. You can do this right here by using an r code block, like this:</p>
 <pre class="r"><code>samples &lt;- rnorm(100, mean=0, sd=1)
 hist(samples)</code></pre>
-<p><img src="journal_files/figure-html/unnamed-chunk-2-1.png" width="672" /> #Challenge 4 :</p>
+<p><img src="journal_files/figure-html/unnamed-chunk-3-1.png" width="672" /> #Challenge 4 :</p>
 </div>
 <div id="map-the-time-course-of-the-cumulative-covid-19-cases" class="section level2">
 <h2><span class="header-section-number">3.2</span> 1. Map the time course of the cumulative Covid-19 cases</h2>
